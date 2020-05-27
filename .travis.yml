@@ -1,0 +1,37 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t grim/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true grim/react-test npm test
+
+after_success:
+  - docker build -t grim/multi-client ./client
+  - docker build -t grim/multi-nginx ./nginx
+  - docker build -t grim/multi-server ./server
+  - docker build -t grim/multi-worker ./worker
+  # Log in to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take these images and push them to docker hub
+  - docker push grim/multi-client
+  - docker push grim/multi-nginx
+  - docker push grim/multi-server
+  - docker push grim/multi-worker
+
+
+
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-central-1"
+  name: "docker-react"
+  env: "DockerReact-env"
+  bucket_name: "elasticbeanstalk-eu-central-1-886813347773"
+  bucket_path: "docker-react"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
