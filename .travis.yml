@@ -14,7 +14,7 @@ after_success:
   - docker build -t grim/multi-server ./server
   - docker build -t grim/multi-worker ./worker
   # Log in to docker CLI
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
   # Take these images and push them to docker hub
   - docker push grim/multi-client
   - docker push grim/multi-nginx
